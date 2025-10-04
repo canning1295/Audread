@@ -4,8 +4,53 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0ea5e9" />
-  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <title>AudRead</title>
+    
+    <!-- Service Worker Killer - Runs once per session to clear old cache -->
+    <script>
+      // Only run SW killer once per browser session
+      if (!sessionStorage.getItem('sw-killed')) {
+        console.log('[SW Killer] Checking for old service workers...');
+        sessionStorage.setItem('sw-killed', 'true');
+        
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            if (registrations.length > 0) {
+              console.log('[SW Killer] Found', registrations.length, 'service workers, clearing...');
+              
+              // Unregister all service workers
+              Promise.all(registrations.map(function(r) { return r.unregister(); }))
+                .then(function() {
+                  console.log('[SW Killer] Service workers unregistered');
+                  // Clear all caches
+                  if ('caches' in window) {
+                    return caches.keys();
+                  }
+                })
+                .then(function(cacheNames) {
+                  if (cacheNames) {
+                    console.log('[SW Killer] Clearing', cacheNames.length, 'caches...');
+                    return Promise.all(cacheNames.map(function(name) { return caches.delete(name); }));
+                  }
+                })
+                .then(function() {
+                  console.log('[SW Killer] Caches cleared, reloading page...');
+                  // Reload after brief delay
+                  setTimeout(function() {
+                    window.location.reload();
+                  }, 500);
+                });
+              return;
+            } else {
+              console.log('[SW Killer] No service workers found, proceeding normally');
+            }
+          });
+        }
+      } else {
+        console.log('[SW Killer] Already ran this session, skipping');
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

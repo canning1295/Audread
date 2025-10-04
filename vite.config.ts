@@ -8,6 +8,37 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        // Force immediate activation of new service worker
+        skipWaiting: true,
+        clientsClaim: true,
+        // Don't cache the HTML file to ensure fresh loads
+        navigateFallbackDenylist: [/^\/_/, /\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: /.*\.(?:png|jpg|jpeg|svg|gif|mp3|m4a|ogg)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'audread-media',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+              }
+            }
+          },
+          {
+            urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/api/'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'audread-api',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 5 * 60 // 5 minutes
+              }
+            }
+          }
+        ]
+      },
       manifest: {
         name: 'AudRead',
         short_name: 'AudRead',
@@ -20,19 +51,8 @@ export default defineConfig({
           { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
         ]
       },
-      workbox: {
-        runtimeCaching: [
-          {
-            urlPattern: /.*\.(?:png|jpg|jpeg|svg|gif|mp3|m4a|ogg)$/,
-            handler: 'CacheFirst',
-            options: { cacheName: 'assets' }
-          },
-          {
-            urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/api/'),
-            handler: 'NetworkFirst',
-            options: { cacheName: 'api' }
-          }
-        ]
+      devOptions: {
+        enabled: false
       }
     })
   ],
