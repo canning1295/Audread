@@ -1,75 +1,39 @@
-import { getToken } from './auth';
+// Settings management using IndexedDB for local storage
+import {
+  loadSettings as loadSettingsFromDB,
+  saveSettings as saveSettingsToDB,
+  type AppSettings,
+} from './indexeddb';
 
-export type AppSettings = {
-  amazon?: { email?: string; token?: string };
-  providers?: Record<string, string>;
-  preferences?: Record<string, unknown>;
-};
+export type { AppSettings };
 
 export async function loadSettings(): Promise<AppSettings> {
-  console.log('[Settings API] loadSettings called');
-  const token = await getToken();
-  console.log('[Settings API] Token retrieved:', token ? `${token.substring(0, 20)}...` : 'null');
-  
-  if (!token) {
-    console.warn('[Settings API] No token available, returning empty settings');
-    return {};
-  }
-  
-  const headers: Record<string, string> = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  
+  console.log('[Settings] Loading settings from IndexedDB');
   try {
-    console.log('[Settings API] Fetching settings from /api/settings');
-    const res = await fetch('/api/settings', { headers });
-    console.log('[Settings API] Response status:', res.status, res.statusText);
-    
-    if (!res.ok) {
-      console.error('[Settings API] Failed to load settings:', res.status, await res.text());
-      return {};
-    }
-    
-    const data = await res.json();
-    console.log('[Settings API] Settings loaded successfully');
-    return data;
+    const settings = await loadSettingsFromDB();
+    console.log('[Settings] Settings loaded successfully');
+    return settings;
   } catch (error) {
-    console.error('[Settings API] Exception while loading settings:', error);
+    console.error('[Settings] Failed to load settings:', error);
     return {};
   }
 }
 
 export async function saveSettings(partial: AppSettings): Promise<void> {
-  console.log('[Settings API] saveSettings called with data:', partial);
-  const token = await getToken();
-  console.log('[Settings API] Token retrieved:', token ? `${token.substring(0, 20)}...` : 'null');
-  
-  if (!token) {
-    console.error('[Settings API] No token available, cannot save settings');
-    throw new Error('Not authenticated - please log in to save settings');
-  }
-  
-  const headers: Record<string, string> = { 'content-type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  
+  console.log('[Settings] Saving settings to IndexedDB');
   try {
-    console.log('[Settings API] Sending PUT request to /api/settings');
-    const response = await fetch('/api/settings', {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(partial)
-    });
+    // Load existing settings and merge
+    const existing = await loadSettingsFromDB();
+    const merged: AppSettings = {
+      amazon: { ...(existing.amazon || {}), ...(partial.amazon || {}) },
+      providers: { ...(existing.providers || {}), ...(partial.providers || {}) },
+      preferences: { ...(existing.preferences || {}), ...(partial.preferences || {}) },
+    };
     
-    console.log('[Settings API] Response status:', response.status, response.statusText);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Settings API] Failed to save settings:', response.status, errorText);
-      throw new Error(`Failed to save settings: ${response.status} - ${errorText}`);
-    }
-    
-    console.log('[Settings API] Settings saved successfully');
+    await saveSettingsToDB(merged);
+    console.log('[Settings] Settings saved successfully');
   } catch (error) {
-    console.error('[Settings API] Exception while saving settings:', error);
+    console.error('[Settings] Failed to save settings:', error);
     throw error;
   }
 }

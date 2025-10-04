@@ -1,3 +1,9 @@
+// DEPRECATED: This function is no longer used as all documents are now stored locally in IndexedDB.
+// Kept for reference or future cloud sync feature.
+//
+// Original purpose: Store user documents in Netlify Blobs with authentication
+// New approach: All documents and sentences stored locally in browser using IndexedDB (src/lib/indexeddb.ts)
+
 import type { Handler } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 

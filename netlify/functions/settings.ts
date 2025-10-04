@@ -1,3 +1,9 @@
+// DEPRECATED: This function is no longer used as all settings are now stored locally in IndexedDB.
+// Kept for reference or future cloud sync feature.
+//
+// Original purpose: Store user settings in Netlify Blobs with Auth0 authentication
+// New approach: All settings stored locally in browser using IndexedDB (src/lib/indexeddb.ts)
+
 import { Handler, HandlerContext } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 import jwt from 'jsonwebtoken';

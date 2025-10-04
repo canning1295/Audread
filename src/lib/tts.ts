@@ -1,3 +1,5 @@
+import { getStorage } from './storage';
+
 export type TTSVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
 
 export type TTSResponse = {
@@ -9,19 +11,32 @@ export type TTSResponse = {
 
 export class TTSManager {
   private currentAudio: HTMLAudioElement | null = null;
-  private cache = new Map<string, string>();
+  private storage = getStorage();
 
   private getCacheKey(text: string, voice: string): string {
-    return `${text.trim()}:${voice}`;
+    // Create a hash for the cache key
+    const normalized = `${text.trim()}:${voice}`;
+    return `tts_${this.simpleHash(normalized)}`;
+  }
+
+  private simpleHash(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(36);
   }
 
   async generateTTS(text: string, voice: TTSVoice = 'alloy', docId?: string, sentenceId?: string): Promise<string | null> {
     const cacheKey = this.getCacheKey(text, voice);
     
-    // Check local cache first
-    const cached = this.cache.get(cacheKey);
-    if (cached) {
-      return cached;
+    // Check IndexedDB cache first
+    const cachedUrl = await this.storage.getAudioURL(cacheKey);
+    if (cachedUrl) {
+      console.log('[TTS] Using cached audio from IndexedDB');
+      return cachedUrl;
     }
 
     try {
@@ -49,8 +64,23 @@ export class TTSManager {
       }
 
       if (data.url) {
-        // Cache the URL locally
-        this.cache.set(cacheKey, data.url);
+        // Fetch the audio data and cache it in IndexedDB
+        try {
+          const audioResponse = await fetch(data.url);
+          if (audioResponse.ok) {
+            const audioBlob = await audioResponse.arrayBuffer();
+            const contentType = audioResponse.headers.get('content-type') || 'audio/mpeg';
+            await this.storage.putAudio(cacheKey, audioBlob, contentType, 60 * 60 * 24 * 7); // Cache for 1 week
+            console.log('[TTS] Audio cached in IndexedDB');
+            
+            // Return the cached URL
+            const newUrl = await this.storage.getAudioURL(cacheKey);
+            return newUrl || data.url;
+          }
+        } catch (cacheError) {
+          console.warn('[TTS] Failed to cache audio in IndexedDB:', cacheError);
+        }
+        
         return data.url;
       }
 
@@ -153,7 +183,8 @@ export class TTSManager {
   }
 
   clearCache(): void {
-    this.cache.clear();
+    // Clear cache is now handled by IndexedDB cleanup
+    console.log('[TTS] Cache clearing is handled by IndexedDB automatic cleanup');
   }
 }
 
