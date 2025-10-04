@@ -1,5 +1,12 @@
 # Agent Handoff — PWA Language Reader
 
+## CRITICAL WORKFLOW RULES
+⚠️ **ALWAYS commit and push changes immediately after making edits:**
+1. After any file changes, run: `git add -A && git commit -m "descriptive message"`
+2. Immediately after committing, run: `git push`
+3. NEVER wait to be asked - this should be automatic
+4. Exception: `.env` files are in `.gitignore` and won't/shouldn't be committed
+
 You have a Vite + React PWA scaffold with Netlify functions and a minimal data layer. Implement the following tasks aligned to the plan shared in the canvas.
 
 1) File import pipeline
