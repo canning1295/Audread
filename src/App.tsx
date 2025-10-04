@@ -99,7 +99,15 @@ function AudReadApp() {
   return (
     <div style={{ maxWidth: 920, margin: '0 auto', padding: 16 }}>
       <header style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <h1 style={{ marginRight: 'auto' }}>AudRead</h1>
+        <h1 style={{ marginRight: 'auto', fontSize: '2em', fontWeight: 'bold' }}>
+          <span style={{ color: '#000' }}>Audible</span>
+          <span style={{ 
+            background: 'linear-gradient(90deg, #ff0000 0%, #ff7f00 14%, #ffff00 28%, #00ff00 42%, #0000ff 57%, #4b0082 71%, #9400d3 85%, #ff1493 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>read</span>
+        </h1>
         <nav style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setView('library')}>Library</button>
           <button onClick={() => setView('import')}>Import</button>
