@@ -33,7 +33,7 @@ Serverless
 - Edge: netlify/edge-functions/cors.ts — adds permissive CORS for /api/*.
 
 Local development with Netlify Dev
-- Enable Netlify Identity in your site dashboard (required for multi-device sync).
+- **IMPORTANT**: Enable Netlify Identity in your site dashboard first! See NETLIFY_IDENTITY_SETUP.md for detailed instructions.
 - Start local dev with functions and Identity proxy:
 	- Netlify Dev proxy is configured in netlify.toml to reuse Vite (targetPort=5173).
 	- Start:
