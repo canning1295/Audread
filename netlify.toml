@@ -12,9 +12,10 @@
   status = 200
   force = true
 
-[[edge_functions]]
-  function = "cors"
-  path = "/api/*"
+# Temporarily disabled - requires Deno installation
+# [[edge_functions]]
+#   function = "cors"
+#   path = "/api/*"
 
 [[scheduled.functions]]
   name = "cache-refresh"

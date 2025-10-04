@@ -9,7 +9,34 @@ type AppSettings = {
   preferences?: Record<string, unknown>;
 };
 
-const store = getStore({ name: 'audread-settings', consistency: 'strong' });
+// Initialize Netlify Blobs
+// In production, Netlify automatically provides the necessary context
+// The getStore() function will use environment variables automatically
+let store: ReturnType<typeof getStore>;
+
+const initStore = () => {
+  if (store) return store;
+  
+  try {
+    // Log available Netlify environment variables for debugging
+    const netlifyEnvs = Object.keys(process.env).filter(k => k.includes('NETLIFY'));
+    console.log('[Settings Function] Available Netlify env vars:', netlifyEnvs);
+    
+    // Try to initialize the store
+    // Netlify Blobs should work automatically in production context
+    store = getStore({ name: 'audread-settings', consistency: 'strong' });
+    console.log('[Settings Function] Store initialized successfully');
+    return store;
+  } catch (error: any) {
+    console.error('[Settings Function] Store initialization failed:', {
+      error: error.message,
+      stack: error.stack,
+      hasContext: !!process.env.NETLIFY_BLOBS_CONTEXT,
+      context: process.env.NETLIFY_BLOBS_CONTEXT
+    });
+    throw error;
+  }
+};
 
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
 const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
@@ -45,13 +72,28 @@ async function verifyAuth0Token(token: string): Promise<any> {
 export const handler: Handler = async (event) => {
   console.log('[Settings Function] Request received:', event.httpMethod, event.path);
   
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
+  
+  // Handle CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: corsHeaders, body: '' };
+  }
+  
   try {
+    // Initialize store lazily on first request
+    const currentStore = initStore();
+    
     const authHeader = event.headers?.authorization || event.headers?.Authorization;
     console.log('[Settings Function] Auth header present:', !!authHeader);
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.error('[Settings Function] Missing or invalid Authorization header');
-      return { statusCode: 401, body: 'Missing or invalid Authorization header' };
+      return { statusCode: 401, headers: corsHeaders, body: 'Missing or invalid Authorization header' };
     }
     
     const token = authHeader.replace('Bearer ', '');
@@ -63,13 +105,13 @@ export const handler: Handler = async (event) => {
       console.log('[Settings Function] Token verified, userId:', decoded.sub);
     } catch (err) {
       console.error('[Settings Function] Token verification failed:', err);
-      return { statusCode: 401, body: 'Invalid Auth0 token' };
+      return { statusCode: 401, headers: corsHeaders, body: 'Invalid Auth0 token' };
     }
     
     const userId = decoded.sub;
     if (!userId) {
       console.error('[Settings Function] No userId in token');
-      return { statusCode: 401, body: 'Unauthorized' };
+      return { statusCode: 401, headers: corsHeaders, body: 'Unauthorized' };
     }
     
     const key = `users/${userId}.json`;
@@ -77,9 +119,9 @@ export const handler: Handler = async (event) => {
 
     if (event.httpMethod === 'GET') {
       console.log('[Settings Function] GET request - loading settings');
-      const s = (await store.get(key, { type: 'json' })) as AppSettings | null;
+      const s = (await currentStore.get(key, { type: 'json' })) as AppSettings | null;
       console.log('[Settings Function] Settings loaded:', !!s);
-      return { statusCode: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify(s || {}) };
+      return { statusCode: 200, headers: { ...corsHeaders, 'content-type': 'application/json' }, body: JSON.stringify(s || {}) };
     }
     
     if (event.httpMethod === 'PUT' || event.httpMethod === 'POST') {
@@ -88,7 +130,7 @@ export const handler: Handler = async (event) => {
       console.log('[Settings Function] Incoming settings keys:', Object.keys(incoming));
       
       // Basic merge: load existing, shallow-merge, save
-      const existing = ((await store.get(key, { type: 'json' })) as AppSettings | null) || {};
+      const existing = ((await currentStore.get(key, { type: 'json' })) as AppSettings | null) || {};
       console.log('[Settings Function] Existing settings keys:', Object.keys(existing));
       
       const merged: AppSettings = {
@@ -97,15 +139,15 @@ export const handler: Handler = async (event) => {
         preferences: { ...(existing.preferences || {}), ...(incoming.preferences || {}) }
       };
       
-      await store.setJSON(key, merged);
+      await currentStore.setJSON(key, merged);
       console.log('[Settings Function] Settings saved successfully');
-      return { statusCode: 204, body: '' };
+      return { statusCode: 204, headers: corsHeaders, body: '' };
     }
     
     console.log('[Settings Function] Method not allowed:', event.httpMethod);
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: corsHeaders, body: 'Method Not Allowed' };
   } catch (e: any) {
     console.error('[Settings Function] Error:', e);
-    return { statusCode: 500, body: e?.message || 'internal error' };
+    return { statusCode: 500, headers: corsHeaders, body: e?.message || 'internal error' };
   }
 };
