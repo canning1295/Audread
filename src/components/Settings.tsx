@@ -8,19 +8,40 @@ export function Settings({ userEmail }: SettingsProps = {}) {
   const [settings, setSettings] = useState<AppSettings>({});
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const diagnostics = useIdentityDiagnostics();
 
   useEffect(() => {
-    loadSettings().then((s) => { setSettings(s || {}); setLoaded(true); });
-  }, []);
+    console.log('[Settings] Loading settings, userEmail:', userEmail);
+    loadSettings()
+      .then((s) => { 
+        console.log('[Settings] Settings loaded successfully:', s);
+        setSettings(s || {}); 
+        setLoaded(true); 
+      })
+      .catch((err) => {
+        console.error('[Settings] Failed to load settings:', err);
+        setLoaded(true);
+      });
+  }, [userEmail]);
 
   function update<K extends keyof AppSettings>(k: K, v: AppSettings[K]) {
     setSettings((prev) => ({ ...prev, [k]: v }));
   }
 
   async function onSave() {
+    console.log('[Settings] Save button clicked, userEmail:', userEmail);
+    setErrorMessage('');
     setSaving(true);
-    try { await saveSettings(settings); } finally { setSaving(false); }
+    try { 
+      await saveSettings(settings);
+      console.log('[Settings] Settings saved successfully');
+    } catch (err: any) {
+      console.error('[Settings] Failed to save settings:', err);
+      setErrorMessage(err?.message || 'Failed to save settings. Please check console for details.');
+    } finally { 
+      setSaving(false); 
+    }
   }
 
   const amazon = settings.amazon || {}; 
@@ -134,6 +155,11 @@ export function Settings({ userEmail }: SettingsProps = {}) {
             {!loggedIn && (
               <p style={{ marginTop: 8, fontSize: '0.85em', color: '#b42318' }}>
                 Log in first so your settings can be written to Netlify Blobs. Your entries will stay in the form until you authenticate.
+              </p>
+            )}
+            {errorMessage && (
+              <p style={{ marginTop: 8, fontSize: '0.85em', color: '#b42318', fontWeight: 'bold' }}>
+                Error: {errorMessage}
               </p>
             )}
           </div>

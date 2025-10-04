@@ -6,16 +6,32 @@ import { GuidancePanel } from '@/components/GuidancePanel';
 import { Library } from './components/Library';
 import { Reader } from './components/Reader';
 import { Settings } from '@/components/Settings';
+import { setTokenGetter } from '@/lib/auth';
 
 
 type View = 'library' | 'reader' | 'import' | 'settings';
 
 export function App() {
+  const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
+  const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  const auth0Audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+
+  console.log('[App] Auth0 configuration:', { 
+    domain: auth0Domain, 
+    clientId: auth0ClientId ? `${auth0ClientId.substring(0, 10)}...` : 'missing',
+    audience: auth0Audience || 'not set'
+  });
+
   return (
     <Auth0Provider
-      domain={import.meta.env.VITE_AUTH0_DOMAIN}
-      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
-      authorizationParams={{ redirect_uri: window.location.origin }}
+      domain={auth0Domain}
+      clientId={auth0ClientId}
+      authorizationParams={{ 
+        redirect_uri: window.location.origin,
+        audience: auth0Audience,
+      }}
+      useRefreshTokens={true}
+      cacheLocation="localstorage"
     >
       <AudReadApp />
     </Auth0Provider>
@@ -25,9 +41,19 @@ export function App() {
 function AudReadApp() {
   const [view, setView] = useState<View>('library');
   const [currentDocId, setCurrentDocId] = useState<string | null>(null);
-  const { user, isAuthenticated, loginWithRedirect, logout, isLoading } = useAuth0();
+  const { user, isAuthenticated, loginWithRedirect, logout, isLoading, getAccessTokenSilently } = useAuth0();
 
   const userEmail = user?.email ?? null;
+
+  // Register the token getter function with the auth module
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('[App] User authenticated, registering token getter');
+      setTokenGetter(async () => await getAccessTokenSilently());
+    } else {
+      console.log('[App] User not authenticated');
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   if (isLoading) return <div>Loading authentication...</div>;
 
