@@ -1,24 +1,35 @@
+import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
+
 import { FileImport } from './components/FileImport';
+import { GuidancePanel } from '@/components/GuidancePanel';
 import { Library } from './components/Library';
 import { Reader } from './components/Reader';
 import { Settings } from '@/components/Settings';
-import { GuidancePanel } from '@/components/GuidancePanel';
-import { currentUser, onAuthChange, openLogin, logout, initIdentity } from './lib/auth';
+
 
 type View = 'library' | 'reader' | 'import' | 'settings';
 
 export function App() {
+  return (
+    <Auth0Provider
+      domain={import.meta.env.VITE_AUTH0_DOMAIN}
+      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
+      authorizationParams={{ redirect_uri: window.location.origin }}
+    >
+      <AudReadApp />
+    </Auth0Provider>
+  );
+}
+
+function AudReadApp() {
   const [view, setView] = useState<View>('library');
   const [currentDocId, setCurrentDocId] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const { user, isAuthenticated, loginWithRedirect, logout, isLoading } = useAuth0();
 
-  useEffect(() => {
-    initIdentity();
-    const u = currentUser();
-    setUserEmail(u?.email ?? null);
-    onAuthChange((nu) => setUserEmail(nu?.email ?? null));
-  }, []);
+  const userEmail = user?.email ?? null;
+
+  if (isLoading) return <div>Loading authentication...</div>;
 
   return (
     <div style={{ maxWidth: 920, margin: '0 auto', padding: 16 }}>
@@ -28,13 +39,13 @@ export function App() {
           <button onClick={() => setView('library')}>Library</button>
           <button onClick={() => setView('import')}>Import</button>
           <button onClick={() => setView('settings')}>Settings</button>
-          {userEmail ? (
+          {isAuthenticated ? (
             <>
               <span style={{ opacity: 0.8 }}>{userEmail}</span>
-              <button onClick={() => logout()}>Logout</button>
+              <button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>Logout</button>
             </>
           ) : (
-            <button onClick={() => openLogin()}>Login</button>
+            <button onClick={() => loginWithRedirect()}>Login</button>
           )}
         </nav>
       </header>

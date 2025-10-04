@@ -1,6 +1,3 @@
-import type { Handler } from '@netlify/functions';
-import { getStore } from '@netlify/blobs';
-
 type AppSettings = {
   amazon?: { email?: string; token?: string };
   providers?: Record<string, string>; // e.g., { OPENAI_API_KEY: '...' }
@@ -9,12 +6,58 @@ type AppSettings = {
 
 const store = getStore({ name: 'audread-settings', consistency: 'strong' });
 
+
+import jwt from 'jsonwebtoken';
+
+const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
+const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
+const AUTH0_JWKS_URI = `https://${AUTH0_DOMAIN}/.well-known/jwks.json`;
+
+import jwksClient from 'jwks-rsa';
+
+const client = jwksClient({ jwksUri: AUTH0_JWKS_URI });
+
+function getKey(header: any, callback: any) {
+  client.getSigningKey(header.kid, function (err, key) {
+    const signingKey = key?.getPublicKey();
+    callback(err, signingKey);
+  });
+}
+
+async function verifyAuth0Token(token: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      token,
+      getKey,
+      {
+        audience: AUTH0_AUDIENCE,
+        issuer: `https://${AUTH0_DOMAIN}/`,
+        algorithms: ['RS256'],
+      },
+      (err, decoded) => {
+        if (err) return reject(err);
+        resolve(decoded);
+      }
+    );
+  });
+}
+
 export const handler: Handler = async (event) => {
   try {
-    const ctx = (event as any).context?.clientContext || (event as any).clientContext;
-    const user = ctx?.user as { sub?: string } | undefined;
-    if (!user?.sub) return { statusCode: 401, body: 'Unauthorized' };
-    const key = `users/${user.sub}.json`;
+    const authHeader = event.headers?.authorization || event.headers?.Authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { statusCode: 401, body: 'Missing or invalid Authorization header' };
+    }
+    const token = authHeader.replace('Bearer ', '');
+    let decoded;
+    try {
+      decoded = await verifyAuth0Token(token);
+    } catch (err) {
+      return { statusCode: 401, body: 'Invalid Auth0 token' };
+    }
+    const userId = decoded.sub;
+    if (!userId) return { statusCode: 401, body: 'Unauthorized' };
+    const key = `users/${userId}.json`;
 
     if (event.httpMethod === 'GET') {
       const s = (await store.get(key, { type: 'json' })) as AppSettings | null;
