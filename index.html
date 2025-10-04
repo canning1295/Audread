@@ -9,6 +9,26 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Immediate startup logging
+      console.log('[HTML] Page loaded, JavaScript is running');
+      console.log('[HTML] Root element exists:', !!document.getElementById('root'));
+      console.log('[HTML] User agent:', navigator.userAgent);
+      
+      // Show loading message
+      const root = document.getElementById('root');
+      if (root) {
+        root.innerHTML = '<div style="padding: 40px; font-family: sans-serif; text-align: center;"><h2>Loading AudRead...</h2><p>Initializing application...</p></div>';
+      }
+      
+      // Log if main.tsx fails to load
+      window.addEventListener('error', function(e) {
+        console.error('[HTML] Global error:', e.error || e.message);
+        if (root) {
+          root.innerHTML = '<div style="padding: 40px; font-family: sans-serif;"><h1>⚠️ Failed to Load</h1><p>Error: ' + (e.error ? e.error.message : e.message) + '</p><p>Check browser console (F12) for details.</p></div>';
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
   </html>
