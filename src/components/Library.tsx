@@ -70,6 +70,15 @@ export function Library({ onOpen }: Props) {
           ))}
         </div>
       )}
+
+      <details open style={{ marginTop: 16, fontSize: '0.9em', color: '#333' }}>
+        <summary style={{ fontWeight: 600, cursor: 'pointer' }}>Library tips & data management</summary>
+        <ul style={{ marginTop: 8, paddingLeft: 18, lineHeight: 1.6 }}>
+          <li>AudRead highlights the sentence you last played during the current session. Multi-device bookmarking is unlocked once you sign in and extend the storage functions.</li>
+          <li>To remove a document today, clear it using your browser’s localStorage tools (key: <code>audread:docs:*</code>) or delete the matching blob in Netlify once API deletion is wired up.</li>
+          <li>Want a hard backup? After logging in, the Netlify Blobs console shows your <code>users/&lt;identity-sub&gt;</code> folder.</li>
+        </ul>
+      </details>
     </section>
   );
 }

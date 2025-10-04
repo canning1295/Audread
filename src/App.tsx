@@ -3,6 +3,7 @@ import { FileImport } from './components/FileImport';
 import { Library } from './components/Library';
 import { Reader } from './components/Reader';
 import { Settings } from '@/components/Settings';
+import { GuidancePanel } from '@/components/GuidancePanel';
 import { currentUser, onAuthChange, openLogin, logout, initIdentity } from './lib/auth';
 
 type View = 'library' | 'reader' | 'import' | 'settings';
@@ -38,19 +39,30 @@ export function App() {
         </nav>
       </header>
 
-      <main>
-        {view === 'import' && (
-          <FileImport onImported={(id: string) => { setCurrentDocId(id); setView('reader'); }} />
-        )}
-        {view === 'library' && (
-          <Library onOpen={(id: string) => { setCurrentDocId(id); setView('reader'); }} />
-        )}
-        {view === 'reader' && currentDocId && (
-          <Reader docId={currentDocId} />
-        )}
-        {view === 'settings' && (
-          <Settings />
-        )}
+      <main
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 24,
+          alignItems: 'flex-start',
+          marginTop: 24,
+        }}
+      >
+        <div style={{ flex: '1 1 480px', minWidth: 0 }}>
+          {view === 'import' && (
+            <FileImport onImported={(id: string) => { setCurrentDocId(id); setView('reader'); }} />
+          )}
+          {view === 'library' && (
+            <Library onOpen={(id: string) => { setCurrentDocId(id); setView('reader'); }} />
+          )}
+          {view === 'reader' && currentDocId && (
+            <Reader docId={currentDocId} />
+          )}
+          {view === 'settings' && (
+            <Settings userEmail={userEmail} />
+          )}
+        </div>
+        <GuidancePanel activeView={view} userEmail={userEmail} />
       </main>
     </div>
   );

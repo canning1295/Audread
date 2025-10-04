@@ -138,6 +138,25 @@ export function FileImport({ onImported }: Props) {
             <span title="Pro Tip: For PDFs, use a reliable converter to TXT for best results. You can create a sample document for testing.">💡 Pro Tip: For PDFs, convert to TXT for best results.</span>
           </div>
       </div>
+
+      <details open style={{ marginTop: 16, fontSize: '0.9em', color: '#333' }}>
+        <summary style={{ fontWeight: 600, cursor: 'pointer' }}>Step-by-step: move a Kindle book into AudRead</summary>
+        <ol style={{ marginTop: 8, paddingLeft: 20, lineHeight: 1.6 }}>
+          <li>Sign in to Amazon → <em>Account &amp; Lists</em> → <em>Content &amp; Devices</em> → <em>Books</em>.</li>
+          <li>Select the title you own, choose <strong>Download &amp; transfer via USB</strong>, and save the AZW/KFX file.</li>
+          <li>Open the file in Calibre (or Kindle Previewer) and convert it to <strong>EPUB</strong> or <strong>TXT</strong>.</li>
+          <li>Return here, upload the converted file, and AudRead will parse it entirely in your browser before syncing summaries.</li>
+        </ol>
+      </details>
+
+      <details open style={{ marginTop: 12, fontSize: '0.9em', color: '#333' }}>
+        <summary style={{ fontWeight: 600, cursor: 'pointer' }}>Security & privacy notes</summary>
+        <ul style={{ marginTop: 8, paddingLeft: 18, lineHeight: 1.6 }}>
+          <li>Raw files are processed locally; only metadata and sentences sync to Netlify when you are logged in.</li>
+          <li>If you stay signed out, everything remains in browser storage so nothing ever leaves your device.</li>
+          <li>Delete a document from <em>Library</em> to remove it from both local storage and your synced account.</li>
+        </ul>
+      </details>
     </section>
   );
 }
