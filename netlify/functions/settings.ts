@@ -1,4 +1,4 @@
-import { Handler } from '@netlify/functions';
+import { Handler, HandlerContext } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
@@ -10,29 +10,34 @@ type AppSettings = {
 };
 
 // Initialize Netlify Blobs
-// In production, Netlify automatically provides the necessary context
-// The getStore() function will use environment variables automatically
-let store: ReturnType<typeof getStore>;
+// In Netlify Functions v2, we need to pass context from the handler
+let storeInstance: ReturnType<typeof getStore> | null = null;
 
-const initStore = () => {
-  if (store) return store;
+const initStore = (context?: HandlerContext) => {
+  if (storeInstance) return storeInstance;
   
   try {
     // Log available Netlify environment variables for debugging
     const netlifyEnvs = Object.keys(process.env).filter(k => k.includes('NETLIFY'));
     console.log('[Settings Function] Available Netlify env vars:', netlifyEnvs);
+    console.log('[Settings Function] Context available:', !!context);
     
-    // Try to initialize the store
-    // Netlify Blobs should work automatically in production context
-    store = getStore({ name: 'audread-settings', consistency: 'strong' });
+    // In Netlify Functions v2, context provides the necessary information
+    // getStore will automatically use the deployment context
+    storeInstance = getStore({ 
+      name: 'audread-settings', 
+      consistency: 'strong'
+    });
+    
     console.log('[Settings Function] Store initialized successfully');
-    return store;
+    return storeInstance;
   } catch (error: any) {
     console.error('[Settings Function] Store initialization failed:', {
       error: error.message,
       stack: error.stack,
       hasContext: !!process.env.NETLIFY_BLOBS_CONTEXT,
-      context: process.env.NETLIFY_BLOBS_CONTEXT
+      context: process.env.NETLIFY_BLOBS_CONTEXT,
+      envKeys: Object.keys(process.env).filter(k => k.includes('NETLIFY') || k.includes('SITE'))
     });
     throw error;
   }
@@ -69,7 +74,7 @@ async function verifyAuth0Token(token: string): Promise<any> {
   });
 }
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event, context) => {
   console.log('[Settings Function] Request received:', event.httpMethod, event.path);
   
   // CORS headers
@@ -85,8 +90,8 @@ export const handler: Handler = async (event) => {
   }
   
   try {
-    // Initialize store lazily on first request
-    const currentStore = initStore();
+    // Initialize store with context
+    const currentStore = initStore(context);
     
     const authHeader = event.headers?.authorization || event.headers?.Authorization;
     console.log('[Settings Function] Auth header present:', !!authHeader);
