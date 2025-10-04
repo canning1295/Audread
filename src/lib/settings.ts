@@ -8,6 +8,7 @@ export type AppSettings = {
 
 export async function loadSettings(): Promise<AppSettings> {
   const token = await getToken();
+  if (!token) return {};
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch('/api/settings', { headers });
@@ -17,6 +18,7 @@ export async function loadSettings(): Promise<AppSettings> {
 
 export async function saveSettings(partial: AppSettings): Promise<void> {
   const token = await getToken();
+  if (!token) throw new Error('Not authenticated');
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   await fetch('/api/settings', {

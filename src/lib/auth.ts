@@ -40,8 +40,8 @@ export function currentUser(): User | null {
 
 export async function getToken(): Promise<string | null> {
   initIdentity();
+  if (!netlifyIdentity?.currentUser) return null;
   const u = netlifyIdentity.currentUser();
-  if (!netlifyIdentity) return null;
   if (!u) return null;
   try {
     const token = await u.jwt();

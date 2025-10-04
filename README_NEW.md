@@ -67,44 +67,49 @@ VITE_DATA_PROVIDER=memory
 
 ### Using the App
 
-1. **Import Documents**: Upload TXT, EPUB, or PDF files
-2. **Create Sample**: Use "Create Sample Document" for testing
-3. **Read**: Click sentences to play audio, select text for dictionary
-4. **Settings**: Configure API keys for full functionality
+### 📦 Sync Your Amazon Library (Beta)
 
-## 🏗️ Architecture
+AudRead now supports importing your Kindle/ebook library directly from Amazon using a secure backend service. This feature uses browser automation to log in and fetch your book list. Your credentials are never stored.
 
+#### How to Sync:
+1. **Open Settings** in the app sidebar.
+2. Scroll to **Amazon Library Sync** and click **Connect Amazon**.
+3. Enter your Amazon email and password in the secure form.
+4. Click **Sync Library**. The app will securely connect to Amazon and retrieve your book list.
+5. Your books will appear in the Library tab, ready for import and reading.
+
+#### Security Tips:
+- Credentials are sent only to the backend service and never stored.
+- Always use strong, unique passwords for your Amazon account.
+- You can revoke access at any time by logging out or disconnecting in Settings.
+
+#### Troubleshooting:
+- If login fails, check your credentials and try again.
+
+
+- Two-factor authentication is not supported in this beta.
+
+- If you have a large library, syncing may take a few minutes.
+
+
+
+- **Responsive UI**: Works seamlessly on desktop, tablet, and mobile.
 - **Frontend**: React + TypeScript + Vite PWA
 - **Backend**: Netlify Functions for API proxying
 - **Storage**: 
   - Local-first with IndexedDB fallback
   - Netlify Blobs for audio/dictionary caching
-  - Netlify DB for metadata sync
+
 - **APIs**: OpenAI (TTS), PONS (dictionary)
 
-## 📁 Project Structure
-
-```
 src/
-├── components/          # React components
-│   ├── FileImport.tsx   # File upload and parsing
-│   ├── Library.tsx      # Document library view
-│   ├── Reader.tsx       # Main reading interface
+
 │   ├── Settings.tsx     # Configuration panel
-│   └── DictionaryLookup.tsx  # Dictionary popup
-├── lib/                 # Core utilities
-│   ├── parser.ts        # File parsing logic
-│   ├── db.ts           # Data layer abstraction
+
 │   ├── tts.ts          # TTS management
-│   ├── auth.ts         # Netlify Identity integration
-│   └── settings.ts     # App configuration
-netlify/
-├── functions/          # Serverless API endpoints
+
 │   ├── dictionary.ts   # PONS API proxy + caching
-│   ├── tts.ts         # OpenAI TTS + caching
-│   ├── docs.ts        # Document metadata API
-│   └── settings.ts    # User settings sync
-```
+
 
 ## 🔄 Data Flow
 
