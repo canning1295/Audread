@@ -26,47 +26,7 @@ The logs confirm this:
      - Identifier: `https://audread-api` (or your domain)
      - Signing Algorithm: RS256
 
-### Step 2: Create Local .env File
-
-In your project root (`/Users/toby/dev/AudRead`), create a `.env` file:
-
-```bash
-# Copy .env.example to .env
-cp .env.example .env
-```
-
-Then edit `.env` and fill in your Auth0 values:
-
-```bash
-# Vite client env (must be prefixed with VITE_)
-VITE_DATA_PROVIDER=netlify-db
-
-# Auth0 configuration (client-side) - FILL THESE IN!
-VITE_AUTH0_DOMAIN=your-tenant.auth0.com
-VITE_AUTH0_CLIENT_ID=your_client_id_here
-VITE_AUTH0_AUDIENCE=https://your-api-identifier
-
-# Auth0 configuration (server-side for Netlify functions)
-AUTH0_DOMAIN=your-tenant.auth0.com
-AUTH0_AUDIENCE=https://your-api-identifier
-
-# Other settings...
-PONS_API_KEY=
-OPENAI_API_KEY=
-LIBRETRANSLATE_URL=
-NETLIFY_BLOBS_SITE_ID=
-```
-
-### Step 3: Restart Your Dev Server
-
-After creating `.env`:
-```bash
-# Stop current dev server (Ctrl+C)
-# Restart it
-npm run netlify:dev
-```
-
-### Step 4: Set Environment Variables in Netlify (Production)
+### Step 2: Set Environment Variables in Netlify
 
 1. Go to [Netlify Dashboard](https://app.netlify.com/)
 2. Select your site
@@ -81,28 +41,28 @@ npm run netlify:dev
 5. **Important**: Redeploy your site after adding variables:
    - Go to **Deploys** → **Trigger deploy** → **Deploy site**
 
-### Step 5: Configure Auth0 Application Settings
+### Step 3: Configure Auth0 Application Settings
 
 In Auth0 Dashboard → Applications → Your Application → Settings:
 
 **Allowed Callback URLs:**
 ```
-http://localhost:8888, https://yourdomain.netlify.app
+https://audreadible.netlify.app
 ```
 
 **Allowed Logout URLs:**
 ```
-http://localhost:8888, https://yourdomain.netlify.app
+https://audreadible.netlify.app
 ```
 
 **Allowed Web Origins:**
 ```
-http://localhost:8888, https://yourdomain.netlify.app
+https://audreadible.netlify.app
 ```
 
 **Save Changes!**
 
-### Step 6: Authorize API
+### Step 4: Authorize API
 
 1. In Auth0 Dashboard → Applications → Your Application
 2. Go to **APIs** tab
@@ -111,23 +71,40 @@ http://localhost:8888, https://yourdomain.netlify.app
 
 ## Verification
 
-After setup, refresh your app and check the console. You should see:
+After Netlify finishes deploying, visit https://audreadible.netlify.app and open the browser console.
+
+You should see:
 ```
-[App] Auth0 configuration: {domain: 'your-tenant.auth0.com', clientId: 'abc123...', audience: 'https://your-api'}
+[App] Auth0 configuration: {domain: 'dev-o56xocxda8dqtlvl.us.auth0.com', clientId: '1yMQ...', audience: 'https://audreadible.netlify.app/api'}
 ```
 
 When you click Login, you should be redirected to Auth0, then back to your app as authenticated.
 
+## Development Workflow
+
+⚠️ **This project uses Netlify for all builds and deployments.**
+
+1. Make code changes locally
+2. Test the build: `npm run build` (optional)
+3. Commit: `git add -A && git commit -m "description"`
+4. Push: `git push origin main`
+5. Netlify automatically rebuilds from GitHub
+6. Monitor deployment at https://app.netlify.com/
+
+**Always commit and push changes to deploy them.**
+
 ## Troubleshooting
 
 ### Issue: Still shows "User not authenticated"
+- Check that environment variables are set in Netlify
+- Verify Netlify deploy completed successfully
 - Clear browser cache and cookies
-- Make sure you restarted the dev server after creating `.env`
-- Check that `.env` is in the project root, not in a subdirectory
+- Check browser console for Auth0 configuration logs
 
 ### Issue: "Invalid state" error after login
-- Make sure Callback URLs in Auth0 exactly match your app URL
+- Make sure Callback URLs in Auth0 exactly match: `https://audreadible.netlify.app`
 - Clear Auth0 cache: `localStorage.clear()` in browser console
+- Redeploy the site from Netlify
 
 ### Issue: "Invalid audience" in token
 - Make sure API is created in Auth0

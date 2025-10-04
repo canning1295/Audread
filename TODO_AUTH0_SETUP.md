@@ -25,24 +25,7 @@ If you don't have an API:
 3. Identifier: `https://audread-api`
 4. Save
 
-### 2️⃣ Add Variables to Local .env File
-
-Edit `/Users/toby/dev/AudRead/.env` and add these lines:
-
-```bash
-# Auth0 configuration (client-side)
-VITE_AUTH0_DOMAIN=YOUR_DOMAIN_HERE.auth0.com
-VITE_AUTH0_CLIENT_ID=YOUR_CLIENT_ID_HERE
-VITE_AUTH0_AUDIENCE=https://YOUR_API_IDENTIFIER
-
-# Auth0 configuration (server-side)
-AUTH0_DOMAIN=YOUR_DOMAIN_HERE.auth0.com
-AUTH0_AUDIENCE=https://YOUR_API_IDENTIFIER
-```
-
-Replace the `YOUR_...` placeholders with your actual values.
-
-### 3️⃣ Add Variables to Netlify (Production)
+### 2️⃣ Add Variables to Netlify (Production Environment)
 
 Go to https://app.netlify.com/ → Your Site → Site configuration → Environment variables
 
@@ -55,7 +38,9 @@ Add these 5 variables:
 
 Then **trigger a redeploy**: Deploys → Trigger deploy → Deploy site
 
-### 4️⃣ Configure Auth0 Application
+⚠️ **IMPORTANT:** All changes are deployed via Netlify. Make sure to commit and push any code changes to trigger automatic rebuilds.
+
+### 3️⃣ Configure Auth0 Application
 
 In Auth0 Dashboard → Applications → Your Application → Settings:
 
@@ -66,31 +51,29 @@ Add your URLs to:
 
 **Save Changes!**
 
-### 5️⃣ Authorize the API
+### 4️⃣ Authorize the API
 
 In Auth0 → Applications → Your Application → APIs tab:
 - Make sure your API is toggled **ON**
 - Save if needed
 
-### 6️⃣ Restart Dev Server
+### 5️⃣ Verify Deployment
 
-```bash
-# Stop current server (Ctrl+C)
-npm run netlify:dev
+After Netlify finishes rebuilding (check the Deploys tab), visit your site:
+https://audreadible.netlify.app
+
+Open browser console and check for:
+```
+[App] Auth0 configuration: {domain: 'dev-o56xocxda8dqtlvl.us.auth0.com', clientId: '1yMQ...', audience: 'https://...'}
 ```
 
-### 7️⃣ Verify
-
-Run the checker script:
-```bash
-./check-auth0-env.sh
-```
-
-You should see all ✅ checkmarks.
+All values should be populated (not undefined).
 
 ## Quick Verification
 
-After setup, refresh your app. In browser console you should see:
+After Netlify deploys, visit https://audreadible.netlify.app and open browser console.
+
+You should see:
 ```
 [App] Auth0 configuration: {domain: 'your-domain.auth0.com', clientId: 'abc123...', audience: 'https://...'}
 ```
@@ -100,12 +83,24 @@ Instead of:
 [App] Auth0 configuration: {domain: undefined, clientId: 'missing', audience: 'not set'}
 ```
 
+Then click Login and you should be redirected to Auth0, then back to your app as authenticated.
+
 ## Need Help?
 
 See detailed instructions in:
 - `SETUP_AUTH0_ENV.md` - Complete step-by-step guide
 - `AUTH0_SETUP.md` - Technical documentation
-- Run `./check-auth0-env.sh` to check your configuration
+
+## Development Workflow
+
+⚠️ **This project deploys via Netlify, not local dev server.**
+
+1. Make code changes locally
+2. Test build locally: `npm run build`
+3. Commit changes: `git add -A && git commit -m "your message"`
+4. Push to GitHub: `git push origin main`
+5. Netlify automatically rebuilds and deploys
+6. Check deploy status at https://app.netlify.com/
 
 ## Why This Happened
 

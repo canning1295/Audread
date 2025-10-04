@@ -78,6 +78,33 @@ The application now includes comprehensive logging at multiple levels:
    - Verify `getAccessTokenSilently()` is being called after authentication
    - Check that token getter is registered in App.tsx
 
+## Development Workflow
+
+⚠️ **IMPORTANT: This project deploys via Netlify, not local dev server.**
+
+### Making Changes
+
+1. Edit code locally
+2. Test build (optional): `npm run build`
+3. Commit changes:
+   ```bash
+   git add -A
+   git commit -m "Description of changes"
+   ```
+4. Push to GitHub:
+   ```bash
+   git push origin main
+   ```
+5. Netlify automatically detects the push and rebuilds
+6. Monitor deploy status at https://app.netlify.com/
+
+### Important Notes
+
+- **All changes must be committed and pushed** to be deployed
+- Netlify builds from the `main` branch on GitHub
+- Environment variables are configured in Netlify dashboard, not `.env` files
+- Check build logs in Netlify if deployment fails
+
 ## Recent Fixes (October 2024)
 
 ### Problem
