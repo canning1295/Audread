@@ -24,8 +24,11 @@ export function Settings() {
 
   return (
     <section>
-      <h2>Settings</h2>
-      {!loaded && <p>Loading…</p>}
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          Settings
+          <span title="Configure your Amazon sync, API keys, and data provider here. Changes are saved locally. Pro Tip: Use strong passwords and keep your API keys private." style={{ cursor: 'pointer', color: '#007bff', fontSize: '1.2em' }}>❓</span>
+        </h2>
+        {!loaded && <p>Loading…</p>}
       {loaded && (
         <div style={{ display: 'grid', gap: 16, maxWidth: 640 }}>
           <fieldset>

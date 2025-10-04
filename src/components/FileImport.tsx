@@ -100,7 +100,10 @@ export function FileImport({ onImported }: Props) {
   return (
     <section>
       <h2>Import Documents</h2>
-      <p>Upload EPUB, PDF, or TXT files to start reading</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <p>Upload EPUB, PDF, or TXT files to start reading</p>
+          <span title="Supported formats: TXT, EPUB, PDF (convert to text for best results). Drag files or use the picker. Language is auto-detected. Click '?' for more tips." style={{ cursor: 'pointer', color: '#007bff', fontSize: '1.2em' }}>❓</span>
+        </div>
       
       <div style={{ marginBottom: 16 }}>
         <input 
@@ -131,6 +134,9 @@ export function FileImport({ onImported }: Props) {
           <li><strong>EPUB:</strong> E-book format (basic support)</li>
           <li><strong>PDF:</strong> Requires conversion to text first</li>
         </ul>
+          <div style={{ marginTop: 8, color: '#007bff', fontSize: '0.95em' }}>
+            <span title="Pro Tip: For PDFs, use a reliable converter to TXT for best results. You can create a sample document for testing.">💡 Pro Tip: For PDFs, convert to TXT for best results.</span>
+          </div>
       </div>
     </section>
   );

@@ -15,7 +15,10 @@ export function Library({ onOpen }: Props) {
     return (
       <section>
         <h2>Library</h2>
-        <p>Loading your documents...</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <p>Loading your documents...</p>
+            <span title="Your imported documents appear here. Click 'Read' to open. Use the search bar to find books. Empty? Import files to get started!" style={{ cursor: 'pointer', color: '#007bff', fontSize: '1.2em' }}>❓</span>
+          </div>
       </section>
     );
   }
@@ -25,7 +28,10 @@ export function Library({ onOpen }: Props) {
       <h2>Library</h2>
       {items.length === 0 ? (
         <div style={{ padding: 16, textAlign: 'center', color: '#666' }}>
-          <p>No documents yet. Import some files to get started!</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <p>No documents yet. Import some files to get started!</p>
+              <span title="Pro Tip: Use tags (coming soon) to organize your library. Click 'Import' to add your first document." style={{ cursor: 'pointer', color: '#007bff', fontSize: '1.1em' }}>💡</span>
+            </div>
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 12 }}>
@@ -45,6 +51,7 @@ export function Library({ onOpen }: Props) {
                   {item.sentenceCount && <span>{item.sentenceCount} sentences • </span>}
                   <span>Added: {new Date(item.createdAt).toLocaleDateString()}</span>
                 </div>
+                  <span title="Click 'Read' to open this document. Your reading position is saved automatically." style={{ cursor: 'pointer', color: '#007bff', fontSize: '1em', marginLeft: 4 }}>❓</span>
               </div>
               <button 
                 onClick={() => onOpen(item.id)}

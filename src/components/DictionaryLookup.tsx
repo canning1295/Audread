@@ -89,6 +89,7 @@ export function DictionaryLookup({ term, language = 'en', onClose }: Props) {
           >
             ×
           </button>
+            <span title="Definitions, examples, and translations for your selected word. Cached results load instantly. Pro Tip: Use dictionary lookups to build your vocabulary." style={{ cursor: 'pointer', color: '#007bff', fontSize: '1.1em', marginLeft: 8 }}>❓</span>
         </div>
 
         {loading && (

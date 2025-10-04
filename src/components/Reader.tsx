@@ -204,6 +204,7 @@ export function Reader({ docId }: Props) {
           <p><strong>Select text</strong> to look up words in the dictionary</p>
           <p><strong>Play All</strong> reads through the entire document</p>
           <p><strong>Note:</strong> TTS requires an OpenAI API key configured in settings</p>
+            <span title="Pro Tip: Use keyboard shortcuts (Space, →, ←) for faster navigation. Select text and click 'Lookup' for instant definitions. Your reading position is saved." style={{ cursor: 'pointer', color: '#007bff', fontSize: '1em', marginTop: 8, display: 'inline-block' }}>💡</span>
         </div>
       </div>
 
