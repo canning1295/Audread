@@ -22,6 +22,45 @@ export function App() {
     audience: auth0Audience || 'not set'
   });
 
+  // Check if Auth0 is properly configured
+  if (!auth0Domain || !auth0ClientId) {
+    console.error('[App] Auth0 not configured! Missing domain or clientId');
+    return (
+      <div style={{ maxWidth: 920, margin: '40px auto', padding: 16 }}>
+        <h1>⚠️ Configuration Error</h1>
+        <div style={{ 
+          padding: 20, 
+          border: '2px solid #d32f2f', 
+          borderRadius: 8, 
+          backgroundColor: '#ffebee',
+          marginTop: 20 
+        }}>
+          <h2>Auth0 Environment Variables Not Set</h2>
+          <p>The application cannot start because Auth0 credentials are missing.</p>
+          
+          <h3>Required Environment Variables:</h3>
+          <ul style={{ fontFamily: 'monospace', backgroundColor: '#fff', padding: 20, borderRadius: 4 }}>
+            <li>VITE_AUTH0_DOMAIN: {auth0Domain || '❌ NOT SET'}</li>
+            <li>VITE_AUTH0_CLIENT_ID: {auth0ClientId ? '✅ SET' : '❌ NOT SET'}</li>
+            <li>VITE_AUTH0_AUDIENCE: {auth0Audience || '⚠️ NOT SET (optional but recommended)'}</li>
+          </ul>
+
+          <h3>To Fix:</h3>
+          <ol style={{ lineHeight: 1.8 }}>
+            <li>Go to <a href="https://app.netlify.com/" target="_blank">Netlify Dashboard</a></li>
+            <li>Navigate to: Site configuration → Environment variables</li>
+            <li>Add the required variables (see TODO_AUTH0_SETUP.md)</li>
+            <li>Trigger a new deploy: Deploys → Trigger deploy → Deploy site</li>
+          </ol>
+
+          <p style={{ marginTop: 20, padding: 15, backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: 4 }}>
+            <strong>📖 Documentation:</strong> Check <code>TODO_AUTH0_SETUP.md</code> and <code>NETLIFY_WORKFLOW.md</code> in the repository for detailed setup instructions.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Auth0Provider
       domain={auth0Domain}
