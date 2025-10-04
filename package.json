@@ -15,15 +15,18 @@
   "dependencies": {
     "@netlify/blobs": "^6.4.0",
     "epub2": "^3.0.2",
+    "express": "^5.1.0",
     "franc": "^6.2.0",
     "jszip": "^3.10.1",
     "pdf-parse": "^2.1.7",
     "pdfjs-dist": "^5.4.149",
+    "puppeteer": "^24.23.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@netlify/functions": "^2.7.0",
+    "@types/express": "^5.0.3",
     "@types/node": "^22.7.5",
     "@types/react": "^18.3.8",
     "@types/react-dom": "^18.3.0",
